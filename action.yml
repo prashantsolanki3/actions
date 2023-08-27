@@ -1,0 +1,33 @@
+name: Setup Tailscale on Ubuntu
+description: 'Setup Tailscale on Ubuntu'
+inputs:
+  authkey:
+    required: false
+    description: 'Tailscale Authkey. If provided, tailscale will be started.'
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Install tailscale
+      shell: bash
+      run: |
+        #!/bin/bash
+        mkdir /home/runner/.ssh
+        touch /home/runner/.ssh/known_hosts
+        ssh-keygen -t rsa -q -f "/home/runner/.ssh/id_rsa" -N ""
+        # Add the Tailscale GPG key
+        curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | sudo apt-key add -
+
+        # Add the Tailscale repository
+        curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+        
+        # Update package list and install Tailscale
+        sudo apt update
+        sudo apt install -y tailscale
+    - name: Start tailscale
+      if: ${{ inputs.authkey != '' }}
+      shell: bash
+      run: |
+        sudo tailscale up --authkey ${{ inputs.authkey }}
+        sudo tailscale status
