@@ -1,6 +1,13 @@
 name: Setup Tailscale on Ubuntu
 
 on:
+  workflow_call:
+    inputs:
+      authkey:
+        required: false
+        type: string
+        description: 'Tailscale Authkey. If provided, tailscale will be started.'
+        default: ''
   workflow_dispatch:
     inputs:
         authkey:
